@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +17,17 @@ export class AppComponent implements OnInit {
   pythonStatus: string = 'checking...';
   javaStatus: string = 'checking...';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
-    this.checkPythonBackend();
-    this.checkJavaBackend();
+    // Sirf browser mein HTTP calls karo, SSR mein nahi
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkPythonBackend();
+      this.checkJavaBackend();
+    }
   }
 
   checkPythonBackend() {
@@ -28,12 +35,10 @@ export class AppComponent implements OnInit {
       next: (data) => {
         this.pythonMessage = data.message;
         this.pythonStatus = 'healthy ✅';
-        console.log('Python backend response:', data);
       },
       error: (err) => {
         this.pythonMessage = 'Could not connect';
         this.pythonStatus = 'unreachable ❌';
-        console.error('Python backend error:', err);
       }
     });
   }
@@ -43,12 +48,10 @@ export class AppComponent implements OnInit {
       next: (data) => {
         this.javaMessage = data.message;
         this.javaStatus = 'healthy ✅';
-        console.log('Java backend response:', data);
       },
       error: (err) => {
         this.javaMessage = 'Could not connect';
         this.javaStatus = 'unreachable ❌';
-        console.error('Java backend error:', err);
       }
     });
   }
