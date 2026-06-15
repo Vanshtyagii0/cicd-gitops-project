@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy-app
+  namespace: default
+spec:
+  description: "Application ko Kubernetes par deploy karta hai"
+  params:
+  - name: app-name
+    description: "Application ka naam"
+    type: string
+  steps:
+  - name: deploy
+    image: bitnami/kubectl:latest
+    script: |
+      #!/bin/bash
+      echo " Deploying $(params.app-name)..."
+      kubectl rollout restart deployment/$(params.app-name)
+      kubectl rollout status deployment/$(params.app-name)
+      echo " $(params.app-name) deployed successfully!"

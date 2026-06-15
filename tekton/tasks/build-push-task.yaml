@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-and-push
+  namespace: default
+spec:
+  description: "Docker image build karke registry mein push karta hai"
+  params:
+  - name: image-name
+    description: "Image ka naam jo build karni hai"
+    type: string
+  - name: context-path
+    description: "Dockerfile ka path"
+    type: string
+  steps:
+  - name: build-and-push
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - "--dockerfile=$(params.context-path)/Dockerfile"
+    - "--context=dir://$(params.context-path)"
+    - "--destination=localhost:5000/$(params.image-name):latest"
+    - "--insecure"
+    - "--skip-tls-verify"
+    volumeMounts:
+    - name: workspace
+      mountPath: /workspace
+  volumes:
+  - name: workspace
+    emptyDir: {}

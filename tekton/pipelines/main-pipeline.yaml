@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cicd-pipeline
+  namespace: default
+spec:
+  description: "Python, Java aur Angular apps ka CI/CD pipeline"
+  params:
+  - name: app-name
+    description: "App ka naam"
+    type: string
+  - name: context-path
+    description: "App ka path"
+    type: string
+
+  tasks:
+  - name: build-push
+    taskRef:
+      name: build-and-push
+    params:
+    - name: image-name
+      value: "$(params.app-name)"
+    - name: context-path
+      value: "$(params.context-path)"
+
+  - name: deploy
+    taskRef:
+      name: deploy-app
+    runAfter:
+    - build-push
+    params:
+    - name: app-name
+      value: "$(params.app-name)"

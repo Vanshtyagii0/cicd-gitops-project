@@ -1,0 +1,24 @@
+<div class="dashboard">
+  <header>
+    <h1>🚀 CI/CD GitOps Dashboard</h1>
+    <p>Minikube + Tekton + ArgoCD</p>
+  </header>
+
+  <div class="services">
+    <div class="card python">
+      <h2>🐍 Python Backend</h2>
+      <p class="status">Status: {{ pythonStatus }}</p>
+      <p class="message">{{ pythonMessage }}</p>
+    </div>
+
+    <div class="card java">
+      <h2>☕ Java Backend</h2>
+      <p class="status">Status: {{ javaStatus }}</p>
+      <p class="message">{{ javaMessage }}</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>Deployed via ArgoCD | Built by Tekton</p>
+  </footer>
+</div>
