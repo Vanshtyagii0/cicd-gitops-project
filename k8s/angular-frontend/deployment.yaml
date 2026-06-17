@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: angular-frontend
-        image: localhost:5000/angular-frontend:latest
+        image: vanshtyagi1/angular-frontend:v1.0
         ports:
         - containerPort: 80
         readinessProbe:

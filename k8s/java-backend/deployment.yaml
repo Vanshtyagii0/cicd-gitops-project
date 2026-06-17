@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: java-backend
-        image: localhost:5000/java-backend:latest
+        image: vanshtyagi1/java-backend:v1.0
         ports:
         - containerPort: 8080
         env:

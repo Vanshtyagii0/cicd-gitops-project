@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: python-backend
-        image: localhost:5000/python-backend:latest
+        image: vanshtyagi1/python-backend:v1.0
         ports:
         - containerPort: 8000
         env:
