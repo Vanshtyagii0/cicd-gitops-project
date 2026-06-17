@@ -1,0 +1,75 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: python-backend-pipeline
+  namespace: tekton-pipelines
+  labels:
+    app: python-backend
+spec:
+  description: |
+    Python Backend ki complete CI/CD Pipeline.
+    Step 1: Code clone karo
+    Step 2: Docker image build karo
+    Step 3: Docker Hub par push karo
+    Step 4: Kubernetes manifest update karo
+  workspaces:
+    - name: python-source
+      description: Python backend ka shared workspace
+  params:
+    - name: repo-url
+      type: string
+      default: "https://github.com/vanshtyagi1/cicd-gitops-project.git"
+    - name: branch
+      type: string
+      default: "main"
+    - name: image-tag
+      type: string
+      default: "latest"
+  tasks:
+    - name: git-clone
+      taskRef:
+        name: python-git-clone
+      workspaces:
+        - name: python-source
+          workspace: python-source
+      params:
+        - name: repo-url
+          value: $(params.repo-url)
+        - name: branch
+          value: $(params.branch)
+
+    - name: docker-build
+      taskRef:
+        name: python-docker-build
+      runAfter:
+        - git-clone
+      workspaces:
+        - name: python-source
+          workspace: python-source
+      params:
+        - name: image-tag
+          value: $(params.image-tag)
+
+    - name: docker-push
+      taskRef:
+        name: python-docker-push
+      runAfter:
+        - docker-build
+      workspaces:
+        - name: python-source
+          workspace: python-source
+      params:
+        - name: image-tag
+          value: $(params.image-tag)
+
+    - name: update-manifest
+      taskRef:
+        name: python-update-manifest
+      runAfter:
+        - docker-push
+      workspaces:
+        - name: python-source
+          workspace: python-source
+      params:
+        - name: image-tag
+          value: $(params.image-tag)

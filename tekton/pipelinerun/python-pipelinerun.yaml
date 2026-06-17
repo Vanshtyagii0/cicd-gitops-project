@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: python-backend-pipelinerun
+  namespace: tekton-pipelines
+  labels:
+    app: python-backend
+spec:
+  pipelineRef:
+    name: python-backend-pipeline
+  workspaces:
+    - name: python-source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+  params:
+    - name: repo-url
+      value: "https://github.com/vanshtyagi1/cicd-gitops-project.git"
+    - name: branch
+      value: "main"
+    - name: image-tag
+      value: "v1.0"

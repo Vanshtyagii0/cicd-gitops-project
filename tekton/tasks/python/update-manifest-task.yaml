@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: python-update-manifest
+  namespace: tekton-pipelines
+  labels:
+    app: python-backend
+    task-type: update-manifest
+spec:
+  description: |
+    Python Backend ka Kubernetes manifest update karta hai.
+    Naya image tag deployment.yaml mein likhta hai.
+    ArgoCD is change ko detect karke automatically deploy karega.
+  workspaces:
+    - name: python-source
+      description: Python backend source code workspace
+  params:
+    - name: image-tag
+      type: string
+      description: Naya Docker image tag
+      default: "latest"
+    - name: image-name
+      type: string
+      description: Docker image ka naam
+      default: "vanshtyagi1/python-backend"
+  steps:
+    - name: update-python-manifest
+      image: alpine/git:latest
+      workingDir: /workspace/python-source
+      script: |
+        #!/bin/sh
+        echo "================================================"
+        echo "   PYTHON BACKEND - UPDATE MANIFEST STARTED    "
+        echo "================================================"
+        echo ""
+        echo "[STEP 1] Current deployment.yaml check kar rahe hain..."
+        cat k8s/python-backend/deployment.yaml
+        echo ""
+        echo "[STEP 2] Naya image tag set kar rahe hain..."
+        echo "         Image: $(params.image-name):$(params.image-tag)"
+        echo ""
+        sed -i 's|image: vanshtyagi1/python-backend:.*|image: vanshtyagi1/python-backend:$(params.image-tag)|g' k8s/python-backend/deployment.yaml
+        echo "[STEP 3] deployment.yaml update ho gaya!"
+        echo ""
+        echo "[STEP 4] Updated deployment.yaml check karo..."
+        cat k8s/python-backend/deployment.yaml
+        echo ""
+        echo "[STEP 5] Git config set kar rahe hain..."
+        git config --global user.email "tekton@cicd.com"
+        git config --global user.name "Tekton Pipeline"
+        echo ""
+        echo "[STEP 6] Changes commit kar rahe hain..."
+        git add k8s/python-backend/deployment.yaml
+        git commit -m "ci: Python Backend image updated to $(params.image-tag) by Tekton Pipeline"
+        echo ""
+        echo "================================================"
+        echo "  PYTHON MANIFEST UPDATED SUCCESSFULLY ✓       "
+        echo "  ArgoCD ab is change ko detect karega          "
+        echo "================================================"

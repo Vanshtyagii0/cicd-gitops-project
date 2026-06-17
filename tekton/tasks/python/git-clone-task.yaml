@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: python-git-clone
+  namespace: tekton-pipelines
+  labels:
+    app: python-backend
+    task-type: git-clone
+spec:
+  description: |
+    Python Backend ka source code GitHub se clone karta hai.
+    Yeh task pipeline ka pehla step hai.
+  workspaces:
+    - name: python-source
+      description: Python backend source code yahan store hoga
+  params:
+    - name: repo-url
+      type: string
+      description: GitHub repository URL
+      default: "https://github.com/vansh-codes/cicd-gitops-project.git"
+    - name: branch
+      type: string
+      description: Git branch name
+      default: "main"
+  steps:
+    - name: clone-python-repo
+      image: alpine/git:latest
+      workingDir: /workspace/python-source
+      script: |
+        #!/bin/sh
+        echo "================================================"
+        echo "   PYTHON BACKEND - GIT CLONE TASK STARTED     "
+        echo "================================================"
+        echo ""
+        echo "[STEP 1] Repository URL: $(params.repo-url)"
+        echo "[STEP 2] Branch: $(params.branch)"
+        echo "[STEP 3] Cloning Python Backend Repository..."
+        echo ""
+        git clone --branch $(params.branch) --single-branch $(params.repo-url) .
+        echo ""
+        echo "[STEP 4] Clone successful! Checking Python files..."
+        echo ""
+        ls -la apps/python-backend/
+        echo ""
+        echo "================================================"
+        echo "   PYTHON GIT CLONE COMPLETED SUCCESSFULLY ✓   "
+        echo "================================================"
