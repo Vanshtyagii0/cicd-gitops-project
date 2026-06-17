@@ -1,13 +1,13 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: python-backend-pipelinerun
+  name: angular-frontend-pipelinerun
   namespace: tekton-pipelines
   labels:
-    app: python-backend
+    app: angular-frontend
 spec:
   pipelineRef:
-    name: python-backend-pipeline
+    name: angular-frontend-pipeline
   workspaces:
     - name: source
       volumeClaimTemplate:
@@ -24,6 +24,6 @@ spec:
     - name: repo-url
       value: "https://github.com/Vanshtyagii0/cicd-gitops-project.git"
     - name: image-ref
-      value: "vanshtyagi1/python-backend"
+      value: "vanshtyagi1/angular-frontend"
     - name: image-tag
       value: "v1.0"

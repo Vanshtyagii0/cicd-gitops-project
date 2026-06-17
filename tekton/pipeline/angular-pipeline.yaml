@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: python-backend-pipeline
+  name: angular-frontend-pipeline
   namespace: tekton-pipelines
 spec:
   workspaces:
@@ -13,7 +13,7 @@ spec:
       default: "https://github.com/Vanshtyagii0/cicd-gitops-project.git"
     - name: image-ref
       type: string
-      default: "vanshtyagi1/python-backend"
+      default: "vanshtyagi1/angular-frontend"
     - name: image-tag
       type: string
       default: "v1.0"
@@ -28,7 +28,7 @@ spec:
         - name: url
           value: $(params.repo-url)
 
-    - name: python-build
+    - name: npm-build
       runAfter: [git-clone]
       workspaces:
         - name: source
@@ -38,22 +38,26 @@ spec:
           - name: source
         steps:
           - name: build
-            image: python:3.11-slim
+            image: node:20-alpine
             script: |
               #!/bin/sh
               echo "========================================"
-              echo "  PYTHON BACKEND - BUILD STEP          "
+              echo "  ANGULAR FRONTEND - NPM BUILD STEP    "
               echo "========================================"
-              cd /workspace/source/apps/python-backend
-              echo "[1] Dependencies install ho rahi hain..."
-              pip install -r requirements.txt
-              echo "[2] Python Build Complete ✓"
+              cd /workspace/source/apps/angular-frontend
+              echo "[1] NPM dependencies install ho rahi hain..."
+              npm ci --silent
+              echo "[2] Angular build chal raha hai..."
+              npm run build
+              echo "[3] Build output check:"
+              ls -la dist/
+              echo "[4] Angular Build Complete ✓"
               echo "========================================"
 
     - name: docker-build-push
       taskRef:
         name: kaniko
-      runAfter: [python-build]
+      runAfter: [npm-build]
       workspaces:
         - name: source
           workspace: source
@@ -63,9 +67,9 @@ spec:
         - name: IMAGE
           value: "$(params.image-ref):$(params.image-tag)"
         - name: CONTEXT
-          value: apps/python-backend
+          value: apps/angular-frontend
         - name: DOCKERFILE
-          value: apps/python-backend/Dockerfile
+          value: apps/angular-frontend/Dockerfile
 
     - name: update-manifest
       runAfter: [docker-build-push]
@@ -86,18 +90,18 @@ spec:
             script: |
               #!/bin/sh
               echo "========================================"
-              echo "  PYTHON - UPDATE MANIFEST STEP        "
+              echo "  ANGULAR - UPDATE MANIFEST STEP       "
               echo "========================================"
               cd /workspace/source
               echo "[1] Image tag update ho raha hai..."
-              sed -i "s|image: $(params.image-ref):.*|image: $(params.image-ref):$(params.image-tag)|g" k8s/python-backend/deployment.yaml
+              sed -i "s|image: $(params.image-ref):.*|image: $(params.image-ref):$(params.image-tag)|g" k8s/angular-frontend/deployment.yaml
               echo "[2] Updated deployment.yaml:"
-              cat k8s/python-backend/deployment.yaml
+              cat k8s/angular-frontend/deployment.yaml
               echo "[3] Git commit ho raha hai..."
               git config --global user.email "tekton@cicd.com"
               git config --global user.name "Tekton Pipeline"
-              git add k8s/python-backend/deployment.yaml
-              git commit -m "ci: Python image updated to $(params.image-tag)"
+              git add k8s/angular-frontend/deployment.yaml
+              git commit -m "ci: Angular image updated to $(params.image-tag)"
               echo "========================================"
               echo "  MANIFEST UPDATED - ArgoCD Sync Hoga ✓"
               echo "========================================"
