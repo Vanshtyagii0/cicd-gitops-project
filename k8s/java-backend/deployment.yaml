@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: java-backend
-        image: vanshtyagi1/java-backend:v2.0
+        image: vanshtyagi1/java-backend:v3.0
         ports:
         - containerPort: 8080
         env:
