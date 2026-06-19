@@ -18,6 +18,7 @@ spec:
       containers:
       - name: java-backend
         image: vanshtyagi1/java-backend:v3.0
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
@@ -25,13 +26,13 @@ spec:
           value: "production"
         readinessProbe:
           httpGet:
-            path: /health
+            path: /actuator/health
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
         livenessProbe:
           httpGet:
-            path: /health
+            path: /actuator/health
             port: 8080
           initialDelaySeconds: 45
           periodSeconds: 20
